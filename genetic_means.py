@@ -148,8 +148,9 @@ class GeneticMeans():
 
         return
 
-    # The three next methods violate the information hiding principles
-    # because of pickling issues bothering the parallel computation
+    # The three next methods (and also another ones from this file) 
+    # violate the information hiding principles because of pickling 
+    # issues bothering the parallel computation
     def computeIndividualFitness(self, individual):
         
         accuracy = self.calculateAccuracy(individual)
@@ -208,4 +209,55 @@ class GeneticMeans():
         eliteIdx = np.argpartition(self.fitness, -numElite)[-numElite:]
         elite = self.population[eliteIdx]
 
-        return elite
+        self.population = elite
+        return
+
+
+
+    def __crossPopulation(self):
+
+        missingPopulation = []
+        numMissingIndividuals = self.populationSize - len(self.population)
+
+        mask = np.random.randint(0, 2, size=population.shape[1])
+        # mask example for a problem with 5 genes [0,1,1,0,1]
+        # meaning that dad0 passes its first gene, da1 its second, and so on...
+
+        for _ in range(numMissingIndividuals):
+            dad0Idx = np.random.randint(0, len(self.population))
+            dad1Idx = np.random.randint(0, len(self.population))
+            dad0 = population[dad0Idx]
+            dad1 = population[dad1Idx]
+            son = []
+
+            for i, gene in enumerate(mask):
+                if gene == 0:
+                    son.append(dad0[i])
+                else:
+                    son.append(dad1[i])
+
+            son = np.array(son)
+            missingPopulation.append(son)
+
+
+        missingPopulation = np.array(missingPopulation)
+        missingPopulation = self.__mutatePopulation(missingPopulation)
+        self.population = np.append(population, missingPopulation, axis=0)
+        return
+
+
+    def __mutatePopulation(self, missingPopulation):
+
+        mutationPercentage = self.mutationRate*100
+        
+        for individual in missingPopulation:
+            for gene in range(len(individual)):
+                
+                rand = np.random.randint(0, 101)
+                if self.__mustMutate(rand, mutationPercentage):
+                    individual[gene] = ~individual[gene]
+
+        return missingPopulation
+
+    def __mustMutate(self, rand, mutation):
+        return rand <= mutation
