@@ -74,6 +74,8 @@ from math import log2
 import pickle
 import os.path
 import csv
+import gc
+
 
 NUM_OF_GENES = 7128
 
@@ -102,6 +104,8 @@ class GeneticMeans():
 
         generation = 1
         while generation <= self.iterations:
+            
+            gc.collect()
 
             if (self.fitness[bestIdx] > greaterScoreFound):
                 greaterScoreFound = np.amax(self.fitness)
