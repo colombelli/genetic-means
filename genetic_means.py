@@ -76,8 +76,8 @@ NUM_OF_GENES = 7128
 
 class GeneticMeans():
     
-    def __init__(self, df, dfLabels, populationSize=50, iterations=100, mutationRate=0.2, 
-                    elitism=0.15, roulette=0.1):
+    def __init__(self, df, dfLabels, populationSize=10, iterations=100, 
+                    mutationRate=0.2, elitism=0.15):
 
         self.df = df
         self.dfLabels = dfLabels
@@ -85,7 +85,6 @@ class GeneticMeans():
         self.iterations = iterations
         self.mutationRate = mutationRate
         self.elitism = elitism
-        self.roulette = roulette
 
 
     def evolve(self):
@@ -132,9 +131,9 @@ class GeneticMeans():
 
     def __generatePopulation(self):
 
-       self.population = [
+       self.population = np.array([
            [bool(random.getrandbits(1)) for i in range(NUM_OF_GENES)] 
-            for i in range(self.populationSize)]
+            for i in range(self.populationSize)])
        return
 
 
@@ -144,12 +143,13 @@ class GeneticMeans():
         self.fitness = [None] * len(self.population)
         pool = mp.Pool(mp.cpu_count())
 
-        self.fitness = [pool.apply(self.computeIndividualFitness, args=(individual, ))
-                   for individual in self.population]
+        self.fitness = np.array([pool.apply(self.computeIndividualFitness, args=(individual, ))
+                   for individual in self.population])
 
         return
 
-
+    # The three next methods violate the information hiding principles
+    # because of pickling issues bothering the parallel computation
     def computeIndividualFitness(self, individual):
         
         accuracy = self.calculateAccuracy(individual)
@@ -198,3 +198,14 @@ class GeneticMeans():
             elif label == 'AML':
                 realLabels_01.append(AML)
         return realLabels_01
+
+
+
+    def __selectPopulation(self):
+
+        numElite = round(self.elitism * self.populationSize)
+        # Get the index of the N greatest scores:
+        eliteIdx = np.argpartition(self.fitness, -numElite)[-numElite:]
+        elite = self.population[eliteIdx]
+
+        return elite
