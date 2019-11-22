@@ -67,7 +67,10 @@
 
 import pandas as pd
 import numpy as np
+import random
+import multiprocessing as mp
 
+NUM_OF_GENES = 7128
 
 class GeneticMeans():
     
@@ -82,7 +85,7 @@ class GeneticMeans():
         self.roulette = roulette
 
 
-    def genetic_algorithm(self)
+    def genetic_algorithm(self):
 
         self.__generatePopulation()
         self.__computeFitness()
@@ -114,6 +117,7 @@ class GeneticMeans():
         return
 
 
+
     def __printIterationStatus(self, generation, bestIdx, greaterScoreFound):
         print("\n\nGeneration:", generation)
         print("Best population score:", self.fitness[bestIdx])
@@ -122,4 +126,14 @@ class GeneticMeans():
         print("Number of genes of the best individual:")
         print("\n\n")
 
+
+
+    def __generatePopulation(self):
+
+       self.population = [
+           bool(random.getrandbits(1)) for i in range(NUM_OF_GENES)] 
+           for i in range(self.populationSize)
+           ]
+
+        return 
 
