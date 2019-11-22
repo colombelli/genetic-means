@@ -79,7 +79,7 @@ NUM_OF_GENES = 7128
 
 class GeneticMeans():
     
-    def __init__(self, df, dfLabels, populationSize=10, iterations=100, 
+    def __init__(self, df, dfLabels, populationSize=50, iterations=100, 
                     mutationRate=0.2, elitism=0.3):
 
         self.df = df
@@ -196,7 +196,7 @@ class GeneticMeans():
 
     def calculateAccuracy(self, individual):
         
-        kmeans = KMeans(n_clusters=2, n_init=50)
+        kmeans = KMeans(n_clusters=2, n_init=25)
         reducedDF = self.df[self.df.columns[individual]]
         kmeans.fit(reducedDF)
 
