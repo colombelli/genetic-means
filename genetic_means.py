@@ -150,7 +150,7 @@ class GeneticMeans():
         with open('ga_best_individual.pkl', 'wb') as best:
             pickle.dump(bestIndividual, best)
 
-        with open('ga_info.csv', "w", newline='') as csv_file:
+        with open('ga_info.csv', "a", newline='') as csv_file:
             writer = csv.writer(csv_file, delimiter=',')
             writer.writerow([generation, bestScore, bestAccuracy, numGenesBestIndividual])
 
