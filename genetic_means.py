@@ -71,12 +71,15 @@ import random
 import multiprocessing as mp
 from sklearn.cluster import KMeans
 from math import log2
+import pickle
+import os.path
+import csv
 
 NUM_OF_GENES = 7128
 
 class GeneticMeans():
     
-    def __init__(self, df, dfLabels, populationSize=50, iterations=100, 
+    def __init__(self, df, dfLabels, populationSize=10, iterations=100, 
                     mutationRate=0.2, elitism=0.3):
 
         self.df = df
@@ -122,13 +125,34 @@ class GeneticMeans():
 
 
     def __printIterationStatus(self, generation, bestIdx, greaterScoreFound):
+       
         bestIndividual = self.population[bestIdx]
+        bestScore = self.fitness[bestIdx]
+        bestAccuracy = self.calculateAccuracy(bestIndividual)
+        numGenesBestIndividual = np.sum(bestIndividual)
+
         print("\n\nGeneration:", generation)
-        print("Best score among the population:", self.fitness[bestIdx])
+        print("Best score among the population:", bestScore)
         print("Greater score found among generations:", greaterScoreFound)
-        print("Accuracy of the best individual:", self.calculateAccuracy(bestIndividual))
-        print("Number of genes of the best individual:", np.sum(bestIndividual))
+        print("Accuracy of the best individual:", bestAccuracy)
+        print("Number of genes of the best individual:", numGenesBestIndividual)
         print("\n\n")
+
+        self.__dumpResults(generation, bestIndividual, bestScore, bestAccuracy, numGenesBestIndividual)
+
+
+    
+    def __dumpResults(self, generation, bestIndividual, bestScore, bestAccuracy, numGenesBestIndividual):
+        
+        with open('ga_pop.pkl', 'wb') as pop_file:
+            pickle.dump(self.population, pop_file)
+
+        with open('ga_best_individual.pkl', 'wb') as best:
+            pickle.dump(bestIndividual, best)
+
+        with open('ga_info.csv', "w", newline='') as csv_file:
+            writer = csv.writer(csv_file, delimiter=',')
+            writer.writerow([generation, bestScore, bestAccuracy, numGenesBestIndividual])
 
 
 

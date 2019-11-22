@@ -1,9 +1,5 @@
 from genetic_means import GeneticMeans
 import pandas as pd
-import numpy as np
-import random
-import multiprocessing as mp
-from sklearn.cluster import KMeans
 
 
 if __name__ == '__main__':  
