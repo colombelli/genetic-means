@@ -219,15 +219,15 @@ class GeneticMeans():
         missingPopulation = []
         numMissingIndividuals = self.populationSize - len(self.population)
 
-        mask = np.random.randint(0, 2, size=population.shape[1])
+        mask = np.random.randint(0, 2, size=self.population.shape[1])
         # mask example for a problem with 5 genes [0,1,1,0,1]
         # meaning that dad0 passes its first gene, da1 its second, and so on...
 
         for _ in range(numMissingIndividuals):
             dad0Idx = np.random.randint(0, len(self.population))
             dad1Idx = np.random.randint(0, len(self.population))
-            dad0 = population[dad0Idx]
-            dad1 = population[dad1Idx]
+            dad0 = self.population[dad0Idx]
+            dad1 = self.population[dad1Idx]
             son = []
 
             for i, gene in enumerate(mask):
@@ -242,7 +242,7 @@ class GeneticMeans():
 
         missingPopulation = np.array(missingPopulation)
         missingPopulation = self.__mutatePopulation(missingPopulation)
-        self.population = np.append(population, missingPopulation, axis=0)
+        self.population = np.append(self.population, missingPopulation, axis=0)
         return
 
 
