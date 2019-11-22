@@ -76,8 +76,8 @@ NUM_OF_GENES = 7128
 
 class GeneticMeans():
     
-    def __init__(self, df, dfLabels, populationSize=10, iterations=100, 
-                    mutationRate=0.2, elitism=0.15):
+    def __init__(self, df, dfLabels, populationSize=50, iterations=100, 
+                    mutationRate=0.2, elitism=0.3):
 
         self.df = df
         self.dfLabels = dfLabels
@@ -104,6 +104,8 @@ class GeneticMeans():
                 greaterScoreFound = np.amax(self.fitness)
                 np.savetxt("best_genetic.txt", bestIndividualPrev)
 
+            self.__printIterationStatus(generation, bestIdx, greaterScoreFound)
+
             self.__selectPopulation()
             self.__crossPopulation()
             self.__computeFitness()
@@ -120,11 +122,12 @@ class GeneticMeans():
 
 
     def __printIterationStatus(self, generation, bestIdx, greaterScoreFound):
+        bestIndividual = self.population[bestIdx]
         print("\n\nGeneration:", generation)
-        print("Best population score:", self.fitness[bestIdx])
+        print("Best score among the population:", self.fitness[bestIdx])
         print("Greater score found among generations:", greaterScoreFound)
-        print("Accuracy of the best individual:")
-        print("Number of genes of the best individual:")
+        print("Accuracy of the best individual:", self.calculateAccuracy(bestIndividual))
+        print("Number of genes of the best individual:", np.sum(bestIndividual))
         print("\n\n")
 
 
