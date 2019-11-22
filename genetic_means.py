@@ -74,7 +74,6 @@ from math import log2
 import pickle
 import os.path
 import csv
-import gc
 
 
 NUM_OF_GENES = 7128
@@ -91,6 +90,8 @@ class GeneticMeans():
         self.mutationRate = mutationRate
         self.elitism = elitism
 
+        self.fitness = []
+        self.population = []
 
     def evolve(self):
 
@@ -104,15 +105,12 @@ class GeneticMeans():
 
         generation = 1
         while generation <= self.iterations:
-            
-            gc.collect()
 
             if (self.fitness[bestIdx] > greaterScoreFound):
                 greaterScoreFound = np.amax(self.fitness)
                 np.savetxt("best_genetic.txt", bestIndividualPrev)
 
             self.__printIterationStatus(generation, bestIdx, greaterScoreFound)
-
             self.__selectPopulation()
             self.__crossPopulation()
             self.__computeFitness()
@@ -121,7 +119,6 @@ class GeneticMeans():
             bestIdx = np.argmax(self.fitness)
             bestIndividual = self.population[bestIdx]
             bestIndividualPrev = bestIndividual
-
 
         print("Max generations reached. Learning algorithm stopped.")
         return
@@ -143,7 +140,7 @@ class GeneticMeans():
         print("\n\n")
 
         self.__dumpResults(generation, bestIndividual, bestScore, bestAccuracy, numGenesBestIndividual)
-
+        return
 
     
     def __dumpResults(self, generation, bestIndividual, bestScore, bestAccuracy, numGenesBestIndividual):
@@ -176,8 +173,10 @@ class GeneticMeans():
 
         self.fitness = np.array([pool.apply(self.computeIndividualFitness, args=(individual, ))
                    for individual in self.population])
-
+        
+        pool.close()
         return
+
 
     # The three next methods (and also another ones from this file) 
     # violate the information hiding principles because of pickling 
