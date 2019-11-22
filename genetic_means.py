@@ -54,7 +54,7 @@
 
     If accuracy < 90:
         accuracy = accuracy - 100
-        accuracy = accuracy * -log2(accuracy)
+        accuracy = accuracy * -log2(-accuracy)
     
     Else:
         accuracy = accuracy * log2(accuracy)
@@ -69,15 +69,18 @@ import pandas as pd
 import numpy as np
 import random
 import multiprocessing as mp
+from sklearn.cluster import KMeans
+from math import log2
 
 NUM_OF_GENES = 7128
 
 class GeneticMeans():
     
-    def __init__(self, df, populationSize=50, iterations=100, mutationRate=0.2, 
+    def __init__(self, df, dfLabels, populationSize=50, iterations=100, mutationRate=0.2, 
                     elitism=0.15, roulette=0.1):
 
         self.df = df
+        self.dfLabels = dfLabels
         self.populationSize = populationSize
         self.iterations = iterations
         self.mutationRate = mutationRate
@@ -89,7 +92,6 @@ class GeneticMeans():
 
         self.__generatePopulation()
         self.__computeFitness()
-
 
         bestIdx = np.argmax(self.fitness)
         bestIndividualPrev = self.population[bestIdx]
@@ -134,3 +136,65 @@ class GeneticMeans():
            [bool(random.getrandbits(1)) for i in range(NUM_OF_GENES)] 
             for i in range(self.populationSize)]
        return
+
+
+
+    def __computeFitness(self):
+
+        self.fitness = [None] * len(self.population)
+        pool = mp.Pool(mp.cpu_count())
+
+        self.fitness = [pool.apply(self.computeIndividualFitness, args=(individual, ))
+                   for individual in self.population]
+
+        return
+
+
+    def computeIndividualFitness(self, individual):
+        
+        accuracy = self.calculateAccuracy(individual)
+
+        if accuracy < 90:
+            accuracy = accuracy - 100
+            accuracy = -log2(-accuracy) * accuracy
+        else:
+            accuracy = accuracy * log2(accuracy)
+        
+        numOfSelectedGenes = np.sum(np.array(individual))
+        normNumOfSelectedGenes = 100 * (numOfSelectedGenes) / 7128
+
+        fitness = accuracy - normNumOfSelectedGenes
+        return fitness   
+
+    def calculateAccuracy(self, individual):
+        
+        kmeans = KMeans(n_clusters=2, n_init=50)
+        reducedDF = self.df[self.df.columns[individual]]
+        kmeans.fit(reducedDF)
+
+        predictedLabels = kmeans.predict(reducedDF)
+
+        # Because there's no way to know which cluster will be assigned to each class
+        realLabels_01 = self.convertLabelsTo01(0, 1)
+        realLabels_10 = self.convertLabelsTo01(1, 0)
+
+        rigthGuesses01 = (np.array(realLabels_01) == predictedLabels)
+        rigthGuesses10 = (np.array(realLabels_10) == predictedLabels)
+        rigthGuesses = max(np.sum(rigthGuesses01), np.sum(rigthGuesses10))
+
+        numSamples = len(self.dfLabels) 
+        numRigthGuesses = np.sum(rigthGuesses)
+
+        accuracy = numRigthGuesses / numSamples * 100
+
+        return accuracy
+
+    def convertLabelsTo01(self, ALL, AML):
+        
+        realLabels_01 = []  
+        for label in list(self.dfLabels):
+            if label == 'ALL':
+                realLabels_01.append(ALL)
+            elif label == 'AML':
+                realLabels_01.append(AML)
+        return realLabels_01
