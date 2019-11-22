@@ -74,7 +74,7 @@ NUM_OF_GENES = 7128
 
 class GeneticMeans():
     
-    def __init__(df, populationSize=50, iterations=100, mutationRate=0.2, 
+    def __init__(self, df, populationSize=50, iterations=100, mutationRate=0.2, 
                     elitism=0.15, roulette=0.1):
 
         self.df = df
@@ -85,7 +85,7 @@ class GeneticMeans():
         self.roulette = roulette
 
 
-    def genetic_algorithm(self):
+    def evolve(self):
 
         self.__generatePopulation()
         self.__computeFitness()
@@ -97,7 +97,7 @@ class GeneticMeans():
 
 
         generation = 1
-        while generation <= max_generations:
+        while generation <= self.iterations:
 
             if (self.fitness[bestIdx] > greaterScoreFound):
                 greaterScoreFound = np.amax(self.fitness)
@@ -131,9 +131,6 @@ class GeneticMeans():
     def __generatePopulation(self):
 
        self.population = [
-           bool(random.getrandbits(1)) for i in range(NUM_OF_GENES)] 
-           for i in range(self.populationSize)
-           ]
-
-        return 
-
+           [bool(random.getrandbits(1)) for i in range(NUM_OF_GENES)] 
+            for i in range(self.populationSize)]
+       return
