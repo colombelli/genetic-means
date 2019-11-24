@@ -72,7 +72,6 @@ import multiprocessing as mp
 from sklearn.cluster import KMeans
 from math import log2
 import pickle
-import os.path
 import csv
 
 
